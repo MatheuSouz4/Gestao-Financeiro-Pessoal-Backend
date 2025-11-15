@@ -1,5 +1,5 @@
 package com.example.loginauthapi.infra.security;
-import com.example.loginauthapi.domain.user.User;
+import com.example.loginauthapi.domain.User;
 import com.example.loginauthapi.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
