@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 // DTO para receber dados de cadastro e atualização
 public record ClienteRequestDTO(
         @NotBlank String nome,
-        @NotBlank String cpfCnpj, // NOVO
+        @NotBlank String cpf_Cnpj, // NOVO
         String email,
         String telefone,
         String endereco, // NOVO

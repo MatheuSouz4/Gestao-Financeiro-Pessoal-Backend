@@ -23,7 +23,7 @@ public class Cliente {
     private String nome;
 
     @Column(unique = true)
-    private String cpfCnpj;
+    private String cpf_Cnpj;
 
     private String email;
     private String telefone;
@@ -32,7 +32,7 @@ public class Cliente {
 
     public Cliente(ClienteRequestDTO data){
         this.nome = data.nome();
-        this.cpfCnpj = data.cpfCnpj();
+        this.cpf_Cnpj = data.cpf_Cnpj();
         this.email = data.email();
         this.telefone = data.telefone();
         this.endereco = data.endereco();

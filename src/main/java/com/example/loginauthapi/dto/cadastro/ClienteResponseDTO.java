@@ -7,7 +7,7 @@ import com.example.loginauthapi.domain.cadastro.Cliente;
 public record ClienteResponseDTO(
         String id,
         String nome,
-        String cpfCnpj, // NOVO
+        String cpf_Cnpj, // NOVO
         String email,
         String telefone,
         String endereco, // NOVO
@@ -17,7 +17,7 @@ public record ClienteResponseDTO(
         this(
                 cliente.getId(),
                 cliente.getNome(),
-                cliente.getCpfCnpj(), // NOVO
+                cliente.getCpf_Cnpj(), // NOVO
                 cliente.getEmail(),
                 cliente.getTelefone(),
                 cliente.getEndereco(), // NOVO

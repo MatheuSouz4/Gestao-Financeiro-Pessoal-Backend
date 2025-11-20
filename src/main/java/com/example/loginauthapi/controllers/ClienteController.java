@@ -57,7 +57,7 @@ public class ClienteController {
 
         
         cliente.setNome(data.nome());
-        cliente.setCpfCnpj(data.cpfCnpj());
+        cliente.setCpf_Cnpj(data.cpf_Cnpj());
         cliente.setEmail(data.email());
         cliente.setTelefone(data.telefone());
         cliente.setEndereco(data.endereco());
