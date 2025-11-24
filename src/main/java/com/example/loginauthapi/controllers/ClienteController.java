@@ -11,11 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/clientes")
+@CrossOrigin(origins = "http://localhost:4200/home")
+
 public class ClienteController {
 
     @Autowired
@@ -62,6 +65,7 @@ public class ClienteController {
         cliente.setTelefone(data.telefone());
         cliente.setEndereco(data.endereco());
         cliente.setDescricao(data.descricao());
+        cliente.setStatus(data.status());
 
 
         return ResponseEntity.ok(new ClienteResponseDTO(cliente));

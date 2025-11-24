@@ -29,6 +29,7 @@ public class Cliente {
     private String telefone;
     private String endereco;
     private String descricao;
+    private String status;
 
     public Cliente(ClienteRequestDTO data){
         this.nome = data.nome();
@@ -37,5 +38,6 @@ public class Cliente {
         this.telefone = data.telefone();
         this.endereco = data.endereco();
         this.descricao = data.descricao();
+        this.status = data.status();
     }
 }

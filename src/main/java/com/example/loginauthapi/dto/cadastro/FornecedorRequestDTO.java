@@ -1,4 +1,4 @@
-// Caminho: src/main/java/com/example/loginauthapi/dto/cadastro/FornecedorRequestDTO.java
+
 package com.example.loginauthapi.dto.cadastro;
 
 import jakarta.validation.constraints.NotBlank;

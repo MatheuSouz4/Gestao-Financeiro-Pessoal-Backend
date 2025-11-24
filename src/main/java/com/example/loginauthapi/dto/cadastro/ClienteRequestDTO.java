@@ -1,4 +1,4 @@
-// Caminho: src/main/java/com/example/loginauthapi/dto/cadastro/ClienteRequestDTO.java
+
 package com.example.loginauthapi.dto.cadastro;
 
 import jakarta.validation.constraints.NotBlank;
@@ -10,6 +10,7 @@ public record ClienteRequestDTO(
         String email,
         String telefone,
         String endereco, // NOVO
-        String descricao // NOVO
+        String descricao, // NOVO
+        String status
 ) {
 }

@@ -11,7 +11,8 @@ public record ClienteResponseDTO(
         String email,
         String telefone,
         String endereco, // NOVO
-        String descricao // NOVO
+        String descricao, // NOVO
+        String status
 ) {
     public ClienteResponseDTO(Cliente cliente){
         this(
@@ -21,7 +22,8 @@ public record ClienteResponseDTO(
                 cliente.getEmail(),
                 cliente.getTelefone(),
                 cliente.getEndereco(), // NOVO
-                cliente.getDescricao() // NOVO
+                cliente.getDescricao(), // NOVO
+                cliente.getStatus()
         );
     }
 }
