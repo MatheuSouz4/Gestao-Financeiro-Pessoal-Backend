@@ -17,16 +17,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/clientes")
-@CrossOrigin(origins = "*")
 
 public class ClienteController {
 
     @Autowired
     private ClienteRepository repository;
 
-    
+
     @PostMapping
-    @Transactional 
+    @Transactional
     public ResponseEntity<ClienteResponseDTO> cadastrarCliente(@RequestBody @Valid ClienteRequestDTO data) {
         Cliente novoCliente = new Cliente(data);
         this.repository.save(novoCliente);

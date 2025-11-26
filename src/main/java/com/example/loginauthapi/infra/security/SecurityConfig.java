@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,11 +34,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/clientes").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/clientes/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/clientes").authenticated() // Deve estar assim se precisa de token
                         .requestMatchers(HttpMethod.PUT, "/clientes/**").authenticated() // Seu PUT já está passando por isso
-                        .requestMatchers(HttpMethod.GET, "/clientes").authenticated() // Seu GET já está passando por isso
-                        // Libera o OPTIONS (necessário para o Angular não tomar 403 no pre-flight)
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 // ADICIONE ISTO: Configuração de CORS explicita no Security
