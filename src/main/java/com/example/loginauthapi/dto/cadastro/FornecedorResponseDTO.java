@@ -7,22 +7,24 @@ public record FornecedorResponseDTO(
         String id,
         String razaoSocial,
         String nomeFantasia,
-        String cpfCnpj,
+        String cpf_Cnpj,
         String email,
         String telefone,
         String endereco, 
-        String descricao 
+        String descricao,
+        String status
 ) {
     public FornecedorResponseDTO(Fornecedor fornecedor) {
         this(
                 fornecedor.getId(),
                 fornecedor.getRazaoSocial(),
                 fornecedor.getNomeFantasia(),
-                fornecedor.getCpfCnpj(),
+                fornecedor.getCpf_Cnpj(),
                 fornecedor.getEmail(),
                 fornecedor.getTelefone(),
                 fornecedor.getEndereco(), 
-                fornecedor.getDescricao() 
+                fornecedor.getDescricao(),
+                fornecedor.getStatus()
         );
     }
 }

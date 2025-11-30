@@ -60,11 +60,12 @@ public class FornecedorController {
         
         fornecedor.setRazaoSocial(data.razaoSocial());
         fornecedor.setNomeFantasia(data.nomeFantasia());
-        fornecedor.setCpfCnpj(data.cpfCnpj()); 
+        fornecedor.setCpf_Cnpj(data.cpf_Cnpj());
         fornecedor.setEmail(data.email());
         fornecedor.setTelefone(data.telefone());
         fornecedor.setEndereco(data.endereco()); 
-        fornecedor.setDescricao(data.descricao()); 
+        fornecedor.setDescricao(data.descricao());
+        fornecedor.setStatus(data.status());
 
 
         return ResponseEntity.ok(new FornecedorResponseDTO(fornecedor));

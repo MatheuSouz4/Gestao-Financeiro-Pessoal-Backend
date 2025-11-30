@@ -28,20 +28,22 @@ public class Fornecedor {
     private String nomeFantasia;
 
     @Column(nullable = false, unique = true)
-    private String cpfCnpj; 
+    private String cpf_Cnpj;
 
     private String email;
     private String telefone;
     private String endereco; 
-    private String descricao; 
+    private String descricao;
+    private String status;
 
     public Fornecedor(FornecedorRequestDTO data){
         this.razaoSocial = data.razaoSocial();
         this.nomeFantasia = data.nomeFantasia();
-        this.cpfCnpj = data.cpfCnpj(); 
+        this.cpf_Cnpj = data.cpf_Cnpj();
         this.email = data.email();
         this.telefone = data.telefone();
         this.endereco = data.endereco(); 
-        this.descricao = data.descricao(); 
+        this.descricao = data.descricao();
+        this.status = data.status();
     }
 }
