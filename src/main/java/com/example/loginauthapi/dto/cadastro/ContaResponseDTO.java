@@ -1,8 +1,9 @@
 package com.example.loginauthapi.dto.cadastro;
 
 import com.example.loginauthapi.domain.cadastro.Conta;
-import com.example.loginauthapi.domain.enums.Recorrencia;
-import com.example.loginauthapi.domain.enums.TipoConta;
+import com.example.loginauthapi.domain.cadastro.Recorrencia;
+import com.example.loginauthapi.domain.cadastro.TipoConta;
+
 
 public record ContaResponseDTO(
         String id,

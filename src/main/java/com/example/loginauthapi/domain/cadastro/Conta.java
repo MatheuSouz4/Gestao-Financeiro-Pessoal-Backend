@@ -1,17 +1,9 @@
 package com.example.loginauthapi.domain.cadastro;
 
 
+import com.example.loginauthapi.dto.cadastro.ContaRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
-
-// 🚨 Tipos de Enums para Recorrência e Tipo
-public enum TipoConta {
-    RECEITA, DESPESA
-}
-
-public enum Recorrencia {
-    UNICA, SEMANAL, MENSAL, TRIMESTRAL, SEMESTRAL, ANUAL
-}
 
 
 @Table(name = "contas")
@@ -22,6 +14,10 @@ public enum Recorrencia {
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 public class Conta {
+
+
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
