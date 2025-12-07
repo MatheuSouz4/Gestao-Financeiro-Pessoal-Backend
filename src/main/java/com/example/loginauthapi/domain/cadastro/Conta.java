@@ -38,11 +38,11 @@ public class Conta {
     // 🚨 Relacionamento (Chaves Estrangeiras - Pode ser null)
     // Armazena o ID do Cliente se for RECEITA
     @Column(name = "cliente_id", nullable = true)
-    private String clienteId;
+    private String cliente;
 
     // Armazena o ID do Fornecedor se for DESPESA
     @Column(name = "fornecedor_id", nullable = true)
-    private String fornecedorId;
+    private String fornecedor;
 
     // Status (Opcional, se o ciclo de vida da conta base for controlado)
     private String status = "ATIVO";
@@ -55,11 +55,11 @@ public class Conta {
 
         // Trata a atribuição condicional dos IDs
         if (this.tipo == TipoConta.RECEITA) {
-            this.clienteId = data.clienteId();
-            this.fornecedorId = null;
+            this.cliente = data.clienteId();
+            this.fornecedor = null;
         } else if (this.tipo == TipoConta.DESPESA) {
-            this.fornecedorId = data.fornecedorId();
-            this.clienteId = null;
+            this.fornecedor = data.fornecedorId();
+            this.cliente = null;
         }
 
         // Status pode vir do DTO ou ser padrão

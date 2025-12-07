@@ -64,11 +64,11 @@ public class ContaController {
 
         // 🚨 Atualização condicional do relacionamento
         if (data.tipo() == TipoConta.RECEITA) {
-            conta.setClienteId(data.clienteId());
-            conta.setFornecedorId(null);
+            conta.setCliente(data.clienteId());
+            conta.setFornecedor(null);
         } else if (data.tipo() == TipoConta.DESPESA) {
-            conta.setFornecedorId(data.fornecedorId());
-            conta.setClienteId(null);
+            conta.setFornecedor(data.fornecedorId());
+            conta.setCliente(null);
         }
 
         return ResponseEntity.ok(new ContaResponseDTO(conta));

@@ -22,8 +22,8 @@ public record ContaResponseDTO(
                 conta.getTipo(),
                 conta.getRecorrencia(),
                 conta.getDescricao(),
-                conta.getClienteId(),
-                conta.getFornecedorId(),
+                conta.getCliente(),
+                conta.getFornecedor(),
                 conta.getStatus()
         );
     }
