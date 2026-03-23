@@ -1,15 +1,16 @@
 
-package com.example.loginauthapi.dto.cadastro;
+package com.example.loginauthapi.dto;
 
+import com.example.loginauthapi.model.Status;
 import jakarta.validation.constraints.NotBlank;
 
 public record FornecedorRequestDTO(
         @NotBlank String razaoSocial,
         @NotBlank String nomeFantasia,
-        @NotBlank String cpf_Cnpj, // RENOMEADO
+        @NotBlank String cpfCnpj, // RENOMEADO
         String email,
         String telefone,
         String endereco, // NOVO
         String descricao, // NOVO
-        String status
+        Status status
 ) {}

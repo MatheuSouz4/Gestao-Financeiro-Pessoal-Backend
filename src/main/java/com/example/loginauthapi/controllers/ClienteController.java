@@ -1,83 +1,48 @@
-
 package com.example.loginauthapi.controllers;
 
-import com.example.loginauthapi.domain.cadastro.Cliente;
-import com.example.loginauthapi.dto.cadastro.ClienteRequestDTO;
-import com.example.loginauthapi.dto.cadastro.ClienteResponseDTO;
-import com.example.loginauthapi.repositories.ClienteRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.loginauthapi.dto.ClienteRequestDTO;
+import com.example.loginauthapi.dto.ClienteResponseDTO;
+import com.example.loginauthapi.services.ClienteService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/clientes")
-
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*") // Importante para conexão com o Angular em dev
 public class ClienteController {
 
-    @Autowired
-    private ClienteRepository repository;
+    private final ClienteService service;
 
+    @GetMapping
+    public ResponseEntity<List<ClienteResponseDTO>> listar() {
+        return ResponseEntity.ok(service.listarTodos());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ClienteResponseDTO> buscar(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
+    }
 
     @PostMapping
-    @Transactional
-    public ResponseEntity<ClienteResponseDTO> cadastrarCliente(@RequestBody @Valid ClienteRequestDTO data) {
-        Cliente novoCliente = new Cliente(data);
-        this.repository.save(novoCliente);
-        return ResponseEntity.ok(new ClienteResponseDTO(novoCliente));
+    public ResponseEntity<ClienteResponseDTO> cadastrar(@RequestBody @Valid ClienteRequestDTO data) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(data));
     }
 
-    
-    @GetMapping
-    public ResponseEntity<List<ClienteResponseDTO>> consultarTodosClientes() {
-        List<ClienteResponseDTO> listaClientes = this.repository.findAll()
-                .stream()
-                .map(ClienteResponseDTO::new)
-                .toList();
-        return ResponseEntity.ok(listaClientes);
-    }
-
-    
-    @GetMapping("/{id}")
-    public ResponseEntity<ClienteResponseDTO> consultarClientePorId(@PathVariable String id) {
-        Cliente cliente = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
-        return ResponseEntity.ok(new ClienteResponseDTO(cliente));
-    }
-
-    
     @PutMapping("/{id}")
-    @Transactional 
-    public ResponseEntity<ClienteResponseDTO> alterarCliente(@PathVariable String id, @RequestBody @Valid ClienteRequestDTO data) {
-        Cliente cliente = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
-
-        
-        cliente.setNome(data.nome());
-        cliente.setCpf_Cnpj(data.cpf_Cnpj());
-        cliente.setEmail(data.email());
-        cliente.setTelefone(data.telefone());
-        cliente.setEndereco(data.endereco());
-        cliente.setDescricao(data.descricao());
-        cliente.setStatus(data.status());
-
-
-        return ResponseEntity.ok(new ClienteResponseDTO(cliente));
+    public ResponseEntity<ClienteResponseDTO> atualizar(@PathVariable Long id, @RequestBody @Valid ClienteRequestDTO data) {
+        return ResponseEntity.ok(service.atualizar(id, data));
     }
-
 
     @DeleteMapping("/{id}")
-    @Transactional
-    public ResponseEntity<Void> excluirCliente(@PathVariable String id) {
-        if (!repository.existsById(id)) {
-            throw new EntityNotFoundException("Cliente não encontrado");
-        }
-        this.repository.deleteById(id);
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        service.excluir(id);
         return ResponseEntity.noContent().build();
     }
 }

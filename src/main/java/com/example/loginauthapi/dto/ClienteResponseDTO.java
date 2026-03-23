@@ -1,29 +1,32 @@
-// Caminho: src/main/java/com/example/loginauthapi/dto/cadastro/ClienteResponseDTO.java
-package com.example.loginauthapi.dto.cadastro;
+package com.example.loginauthapi.dto;
 
-import com.example.loginauthapi.domain.cadastro.Cliente;
+import com.example.loginauthapi.model.Cliente;
+import com.example.loginauthapi.model.Status;
+import java.time.LocalDateTime;
 
 // DTO para enviar dados de resposta (consulta)
 public record ClienteResponseDTO(
-        String id,
+        Long id,
         String nome,
-        String cpf_Cnpj, // NOVO
+        String cpfCnpj, // NOVO
         String email,
         String telefone,
         String endereco, // NOVO
         String descricao, // NOVO
-        String status
+        Status status,
+        LocalDateTime dataCadastro
 ) {
     public ClienteResponseDTO(Cliente cliente){
         this(
                 cliente.getId(),
                 cliente.getNome(),
-                cliente.getCpf_Cnpj(), // NOVO
+                cliente.getCpfCnpj(), // NOVO
                 cliente.getEmail(),
                 cliente.getTelefone(),
                 cliente.getEndereco(), // NOVO
                 cliente.getDescricao(), // NOVO
-                cliente.getStatus()
+                cliente.getStatus(),
+                cliente.getDataCadastro()
         );
     }
 }

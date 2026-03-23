@@ -1,84 +1,48 @@
-
 package com.example.loginauthapi.controllers;
 
-import com.example.loginauthapi.domain.cadastro.Fornecedor;
-import com.example.loginauthapi.dto.cadastro.FornecedorRequestDTO;
-import com.example.loginauthapi.dto.cadastro.FornecedorResponseDTO;
-import com.example.loginauthapi.repositories.FornecedorRepository;
-
-import jakarta.persistence.EntityNotFoundException;
+import com.example.loginauthapi.dto.FornecedorRequestDTO;
+import com.example.loginauthapi.dto.FornecedorResponseDTO;
+import com.example.loginauthapi.services.FornecedorService;
 import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/fornecedores")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*") // Essencial para o Angular conseguir fazer as requisições sem erro de CORS
 public class FornecedorController {
 
-    @Autowired
-    private FornecedorRepository repository;
+    private final FornecedorService service;
 
-    
-    @PostMapping
-    @Transactional
-    public ResponseEntity<FornecedorResponseDTO> cadastrarFornecedor(@RequestBody @Valid FornecedorRequestDTO data) {
-        Fornecedor novoFornecedor = new Fornecedor(data);
-        this.repository.save(novoFornecedor);
-        return ResponseEntity.ok(new FornecedorResponseDTO(novoFornecedor));
-    }
-
-    
     @GetMapping
     public ResponseEntity<List<FornecedorResponseDTO>> consultarTodosFornecedores() {
-        List<FornecedorResponseDTO> listaFornecedores = this.repository.findAll()
-                .stream()
-                .map(FornecedorResponseDTO::new)
-                .toList();
-        return ResponseEntity.ok(listaFornecedores);
+        return ResponseEntity.ok(service.listarTodos());
     }
 
-    
     @GetMapping("/{id}")
-    public ResponseEntity<FornecedorResponseDTO> consultarFornecedorPorId(@PathVariable String id) {
-        Fornecedor fornecedor = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Fornecedor não encontrado"));
-        return ResponseEntity.ok(new FornecedorResponseDTO(fornecedor));
+    public ResponseEntity<FornecedorResponseDTO> consultarFornecedorPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarPorId(id));
     }
 
-    
+    @PostMapping
+    public ResponseEntity<FornecedorResponseDTO> cadastrarFornecedor(@RequestBody @Valid FornecedorRequestDTO data) {
+        // Retornando 201 Created para post, o que é o padrão correto de API REST
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.salvar(data));
+    }
+
     @PutMapping("/{id}")
-    @Transactional
-    public ResponseEntity<FornecedorResponseDTO> alterarFornecedor(@PathVariable String id, @RequestBody @Valid FornecedorRequestDTO data) {
-        Fornecedor fornecedor = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Fornecedor não encontrado"));
-
-        
-        fornecedor.setRazaoSocial(data.razaoSocial());
-        fornecedor.setNomeFantasia(data.nomeFantasia());
-        fornecedor.setCpf_Cnpj(data.cpf_Cnpj());
-        fornecedor.setEmail(data.email());
-        fornecedor.setTelefone(data.telefone());
-        fornecedor.setEndereco(data.endereco()); 
-        fornecedor.setDescricao(data.descricao());
-        fornecedor.setStatus(data.status());
-
-
-        return ResponseEntity.ok(new FornecedorResponseDTO(fornecedor));
+    public ResponseEntity<FornecedorResponseDTO> alterarFornecedor(@PathVariable Long id, @RequestBody @Valid FornecedorRequestDTO data) {
+        return ResponseEntity.ok(service.atualizar(id, data));
     }
-
 
     @DeleteMapping("/{id}")
-    @Transactional
-    public ResponseEntity<Void> excluirFornecedor(@PathVariable String id) {
-        if (!repository.existsById(id)) {
-            throw new EntityNotFoundException("Fornecedor não encontrado");
-        }
-        this.repository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> excluirFornecedor(@PathVariable Long id) {
+        service.excluir(id);
+        return ResponseEntity.noContent().build(); // Retornando 204 No Content
     }
 }

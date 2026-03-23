@@ -1,6 +1,6 @@
 package com.example.loginauthapi.controllers;
 
-import com.example.loginauthapi.domain.User;
+import com.example.loginauthapi.model.User;
 import com.example.loginauthapi.dto.LoginRequestDTO;
 import com.example.loginauthapi.dto.RegisterRequestDTO;
 import com.example.loginauthapi.dto.ResponseDTO;

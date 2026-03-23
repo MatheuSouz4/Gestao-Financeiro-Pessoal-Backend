@@ -1,4 +1,4 @@
-package com.example.loginauthapi.domain.cadastro;
+package com.example.loginauthapi.model;
 
 public enum Recorrencia {
     UNICA, SEMANAL, MENSAL, TRIMESTRAL, SEMESTRAL, ANUAL

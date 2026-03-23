@@ -1,19 +1,20 @@
-package com.example.loginauthapi.dto.cadastro;
+package com.example.loginauthapi.dto;
 
-import com.example.loginauthapi.domain.cadastro.Conta;
-import com.example.loginauthapi.domain.cadastro.Recorrencia;
-import com.example.loginauthapi.domain.cadastro.TipoConta;
+import com.example.loginauthapi.model.Conta;
+import com.example.loginauthapi.model.Recorrencia;
+import com.example.loginauthapi.model.Status;
+import com.example.loginauthapi.model.TipoConta;
 
 
 public record ContaResponseDTO(
-        String id,
+        Long id,
         String nome,
         TipoConta tipo,
         Recorrencia recorrencia,
         String descricao,
-        String clienteId,
-        String fornecedorId,
-        String status
+        Long clienteId,
+        Long fornecedorId,
+        Status status
 ) {
     public ContaResponseDTO(Conta conta) {
         this(
@@ -22,8 +23,8 @@ public record ContaResponseDTO(
                 conta.getTipo(),
                 conta.getRecorrencia(),
                 conta.getDescricao(),
-                conta.getCliente(),
-                conta.getFornecedor(),
+                conta.getClienteId(),
+                conta.getFornecedorId(),
                 conta.getStatus()
         );
     }

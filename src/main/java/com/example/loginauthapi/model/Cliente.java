@@ -1,12 +1,15 @@
+package com.example.loginauthapi.model;
 
-package com.example.loginauthapi.domain.cadastro;
-import com.example.loginauthapi.dto.cadastro.ClienteRequestDTO;
+import com.example.loginauthapi.dto.ClienteRequestDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import java.time.LocalDateTime;
+
 
 @Table(name = "clientes")
 @Entity(name = "clientes")
@@ -17,23 +20,27 @@ import lombok.Setter;
 @EqualsAndHashCode(of = "id")
 public class Cliente {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
-
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String nome;
 
     @Column(unique = true)
-    private String cpf_Cnpj;
-
+    private String cpfCnpj;
     private String email;
     private String telefone;
     private String endereco;
     private String descricao;
-    private String status;
+
+    @Enumerated(EnumType.STRING) // Salva o nome do Enum no banco (ex: "ATIVO")
+    private Status status;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime dataCadastro; // Importante para relatórios financeiros
 
     public Cliente(ClienteRequestDTO data){
         this.nome = data.nome();
-        this.cpf_Cnpj = data.cpf_Cnpj();
+        this.cpfCnpj = data.cpfCnpj();
         this.email = data.email();
         this.telefone = data.telefone();
         this.endereco = data.endereco();

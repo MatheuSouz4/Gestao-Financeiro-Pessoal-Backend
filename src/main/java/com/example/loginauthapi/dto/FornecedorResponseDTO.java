@@ -1,30 +1,34 @@
 
-package com.example.loginauthapi.dto.cadastro;
+package com.example.loginauthapi.dto;
 
-import com.example.loginauthapi.domain.cadastro.Fornecedor;
+import com.example.loginauthapi.model.Fornecedor;
+import com.example.loginauthapi.model.Status;
+import java.time.LocalDateTime;
 
 public record FornecedorResponseDTO(
-        String id,
+        Long id,
         String razaoSocial,
         String nomeFantasia,
-        String cpf_Cnpj,
+        String cpfCnpj,
         String email,
         String telefone,
         String endereco, 
         String descricao,
-        String status
+        Status status,
+        LocalDateTime dataCadastro
 ) {
     public FornecedorResponseDTO(Fornecedor fornecedor) {
         this(
                 fornecedor.getId(),
                 fornecedor.getRazaoSocial(),
                 fornecedor.getNomeFantasia(),
-                fornecedor.getCpf_Cnpj(),
+                fornecedor.getCpfCnpj(),
                 fornecedor.getEmail(),
                 fornecedor.getTelefone(),
                 fornecedor.getEndereco(), 
                 fornecedor.getDescricao(),
-                fornecedor.getStatus()
+                fornecedor.getStatus(),
+                fornecedor.getDataCadastro()
         );
     }
 }

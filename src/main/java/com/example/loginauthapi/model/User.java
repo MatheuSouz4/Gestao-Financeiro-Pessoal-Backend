@@ -1,4 +1,4 @@
-package com.example.loginauthapi.domain;
+package com.example.loginauthapi.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
