@@ -31,6 +31,7 @@ public class FornecedorService {
     @Transactional
     public FornecedorResponseDTO salvar(FornecedorRequestDTO data) {
         Fornecedor novoFornecedor = new Fornecedor(data);
+        novoFornecedor.validarConsistenciaDados();
         return new FornecedorResponseDTO(repository.save(novoFornecedor));
     }
 
@@ -39,15 +40,17 @@ public class FornecedorService {
         Fornecedor fornecedor = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Fornecedor não encontrado"));
 
-        // Atualização dos campos encapsulada na transação
-        fornecedor.setRazaoSocial(data.razaoSocial());
-        fornecedor.setNomeFantasia(data.nomeFantasia());
+        // Atualização dos campos herdados e específicos
+        fornecedor.setNomeOuNomeFantasia(data.nomeOuNomeFantasia());
+        fornecedor.setRazaoSocial(data.RazaoSocial());
+        fornecedor.setTipoPessoa(data.tipoPessoa());
         fornecedor.setCpfCnpj(data.cpfCnpj());
+        fornecedor.setInscricaoEstadual(data.inscricaoEstadual());
         fornecedor.setEmail(data.email());
         fornecedor.setTelefone(data.telefone());
         fornecedor.setEndereco(data.endereco());
         fornecedor.setDescricao(data.descricao());
-        fornecedor.setStatus(data.status()); // Mantendo a consistência do Enum que você já deve ter configurado
+        fornecedor.setStatus(data.status());
 
         return new FornecedorResponseDTO(fornecedor);
     }
