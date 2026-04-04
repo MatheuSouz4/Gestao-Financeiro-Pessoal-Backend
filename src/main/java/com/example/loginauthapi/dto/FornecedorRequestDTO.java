@@ -10,10 +10,11 @@ import org.hibernate.validator.constraints.br.CPF;
 
 public record FornecedorRequestDTO(
         @NotBlank(message = "O nome ou razão social é obrigatório") String nomeOuNomeFantasia,
-        String RazaoSocial, // Geralmente aplicável a Pessoa Jurídica
+        String razaoSocial, // Geralmente aplicável a Pessoa Jurídica
         @NotNull(message = "O tipo de pessoa (FISICA ou JURIDICA) é obrigatório") TipoPessoa tipoPessoa,
-        @NotBlank @CNPJ(message = "O CPF/CNPJ é obrigatório") String cpfCnpj,
+        @NotBlank(message = "O CPF/CNPJ é obrigatório") String cpfCnpj,
         String inscricaoEstadual, // Exclusivo para Pessoa Jurídica
+        String rg,
         @Email(message = "Formato de e-mail inválido") String email,
         String telefone,
         String endereco,

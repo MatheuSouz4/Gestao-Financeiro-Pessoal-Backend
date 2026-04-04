@@ -43,9 +43,11 @@ public class ClienteService {
 
         // Atualização dos campos herdados e específicos
         cliente.setNomeOuNomeFantasia(data.nomeOuNomeFantasia());
+        cliente.setRazaoSocial(data.razaoSocial());
         cliente.setTipoPessoa(data.tipoPessoa());
         cliente.setCpfCnpj(data.cpfCnpj());
         cliente.setRg(data.rg());
+        cliente.setInscricaoEstadual(data.inscricaoEstadual());
         cliente.setEmail(data.email());
         cliente.setTelefone(data.telefone());
         cliente.setEndereco(data.endereco());

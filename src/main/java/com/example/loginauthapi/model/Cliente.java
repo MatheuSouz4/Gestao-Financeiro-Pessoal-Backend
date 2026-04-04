@@ -23,7 +23,9 @@ public class Cliente extends Pessoa { // Aplicando a Herança
     public Cliente(ClienteRequestDTO data){
         super();
         this.setNomeOuNomeFantasia(data.nomeOuNomeFantasia());
+        this.setRazaoSocial(data.razaoSocial());
         this.setCpfCnpj(data.cpfCnpj());
+        this.setInscricaoEstadual(data.inscricaoEstadual());
         this.setRg(data.rg());
         this.setTipoPessoa(data.tipoPessoa());
         this.setEmail(data.email());

@@ -1,6 +1,7 @@
 package com.example.loginauthapi.services;
 
 import com.example.loginauthapi.dto.DashboardResumoDTO;
+import com.example.loginauthapi.dto.LancamentoGraficoDTO;
 import com.example.loginauthapi.dto.LancamentoRequestDTO;
 import com.example.loginauthapi.dto.QuitacaoRequestDTO;
 import com.example.loginauthapi.model.Conta;
@@ -86,5 +87,13 @@ public class LancamentoService {
                 .count();
 
         return new DashboardResumoDTO(pago, pendente, qtd);
+    }
+
+    /**
+     * Obtém os dados formatados para o gráfico do Dashboard
+     * @param dataInicio Data de corte (ex: 30 dias atrás)
+     */
+    public List<LancamentoGraficoDTO> obterDadosGrafico(LocalDate dataInicio) {
+        return repository.buscarDadosGrafico(dataInicio);
     }
 }

@@ -7,11 +7,12 @@ import java.time.LocalDateTime;
 
 public record FornecedorResponseDTO(
         Long id,
-        String nomeOuRazaoSocial,
-        String nomeFantasia,
+        String nomeOuNomeFantasia,
+        String razaoSocial,
         TipoPessoa tipoPessoa,
         String cpfCnpj,
         String inscricaoEstadual,
+        String rg,
         String email,
         String telefone,
         String endereco,
@@ -27,6 +28,7 @@ public record FornecedorResponseDTO(
                 fornecedor.getTipoPessoa(),
                 fornecedor.getCpfCnpj(),
                 fornecedor.getInscricaoEstadual(),
+                fornecedor.getRg(),
                 fornecedor.getEmail(),
                 fornecedor.getTelefone(),
                 fornecedor.getEndereco(),

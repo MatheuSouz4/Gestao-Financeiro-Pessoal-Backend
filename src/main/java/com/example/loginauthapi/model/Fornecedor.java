@@ -22,9 +22,10 @@ public class Fornecedor extends Pessoa { // Aplicando a Herança
     public Fornecedor(FornecedorRequestDTO data){
         super();
         this.setNomeOuNomeFantasia(data.nomeOuNomeFantasia());
-        this.setRazaoSocial(data.RazaoSocial());
+        this.setRazaoSocial(data.razaoSocial());
         this.setCpfCnpj(data.cpfCnpj());
         this.setInscricaoEstadual(data.inscricaoEstadual());
+        this.setRg(data.rg());
         this.setTipoPessoa(data.tipoPessoa());
         this.setEmail(data.email());
         this.setTelefone(data.telefone());

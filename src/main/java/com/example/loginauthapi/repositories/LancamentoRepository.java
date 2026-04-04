@@ -12,10 +12,11 @@ import java.util.List;
 
 @Repository
 public interface LancamentoRepository extends JpaRepository<Lancamento, Long> {
-    // Aqui você pode adicionar buscas customizadas se necessário
-    @Query("SELECT new com.gestao.financeira.dto.LancamentoGraficoDTO(l.dataPagamento, SUM(l.valorPago)) " +
+    @Query("SELECT new com.example.loginauthapi.dto.LancamentoGraficoDTO(l.dataPagamento, SUM(l.valorPago)) " +
             "FROM Lancamento l " +
-            "WHERE l.status = 'PAGA' AND l.dataPagamento >= :inicio " +
-            "GROUP BY l.dataPagamento ORDER BY l.dataPagamento")
+            "WHERE l.status = 'PAGA' " +
+            "AND l.dataPagamento >= :inicio " +
+            "GROUP BY l.dataPagamento " +
+            "ORDER BY l.dataPagamento ASC")
     List<LancamentoGraficoDTO> buscarDadosGrafico(@Param("inicio") LocalDate inicio);
 }

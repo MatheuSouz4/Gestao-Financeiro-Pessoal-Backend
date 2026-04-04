@@ -42,7 +42,7 @@ public class FornecedorService {
 
         // Atualização dos campos herdados e específicos
         fornecedor.setNomeOuNomeFantasia(data.nomeOuNomeFantasia());
-        fornecedor.setRazaoSocial(data.RazaoSocial());
+        fornecedor.setRazaoSocial(data.razaoSocial());
         fornecedor.setTipoPessoa(data.tipoPessoa());
         fornecedor.setCpfCnpj(data.cpfCnpj());
         fornecedor.setInscricaoEstadual(data.inscricaoEstadual());
