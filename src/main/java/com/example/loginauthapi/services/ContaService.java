@@ -9,7 +9,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
@@ -25,52 +24,43 @@ public class ContaService {
     }
 
     public ContaResponseDTO buscarPorId(Long id) {
-        Conta conta = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Conta não encontrada"));
-        return new ContaResponseDTO(conta);
+        return repository.findById(id)
+                .map(ContaResponseDTO::new)
+                .orElseThrow(() -> new EntityNotFoundException("Conta ID " + id + " não encontrada"));
     }
 
     @Transactional
     public ContaResponseDTO salvar(ContaRequestDTO data) {
-        validarRegraDeNegocio(data);
-        Conta novaConta = new Conta(data);
+        validarVinculoObrigatorio(data);
+        var novaConta = new Conta(data);
         return new ContaResponseDTO(repository.save(novaConta));
     }
 
     @Transactional
     public ContaResponseDTO atualizar(Long id, ContaRequestDTO data) {
-        validarRegraDeNegocio(data);
+        validarVinculoObrigatorio(data);
 
         Conta conta = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Conta não encontrada"));
 
-        conta.setNome(data.nome());
-        conta.setTipo(data.tipo());
-        conta.setRecorrencia(data.recorrencia());
-        conta.setDescricao(data.descricao());
-        conta.setStatus(data.status());
-
-        // Reatribui os relacionamentos com base no novo DTO
-        conta.atribuirRelacionamentos(data);
-
-        return new ContaResponseDTO(conta);
+        conta.atualizarDados(data);
+        return new ContaResponseDTO(repository.save(conta));
     }
 
     @Transactional
     public void excluir(Long id) {
         if (!repository.existsById(id)) {
-            throw new EntityNotFoundException("Conta não encontrada");
+            throw new EntityNotFoundException("Não é possível excluir: Conta não encontrada");
         }
         repository.deleteById(id);
     }
 
-    // A validação saiu do Controller e veio para o Service
-    private void validarRegraDeNegocio(ContaRequestDTO data) {
+    private void validarVinculoObrigatorio(ContaRequestDTO data) {
         if (data.tipo() == TipoConta.RECEITA && data.clienteId() == null) {
-            throw new IllegalArgumentException("Para contas de RECEITA, o ID do Cliente é obrigatório.");
+            throw new IllegalArgumentException("Receitas exigem um Cliente vinculado.");
         }
         if (data.tipo() == TipoConta.DESPESA && data.fornecedorId() == null) {
-            throw new IllegalArgumentException("Para contas de DESPESA, o ID do Fornecedor é obrigatório.");
+            throw new IllegalArgumentException("Despesas exigem um Fornecedor vinculado.");
         }
     }
 }

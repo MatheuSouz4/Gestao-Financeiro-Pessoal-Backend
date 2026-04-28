@@ -5,9 +5,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Table(name = "contas")
-@Entity(name = "Conta")
+@Entity(name = "conta")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@Builder // Facilita a criação em testes
 @EqualsAndHashCode(of = "id")
 public class Conta {
 
@@ -22,13 +23,8 @@ public class Conta {
     @Column(nullable = false)
     private TipoConta tipo;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Recorrencia recorrencia;
-
     private String descricao;
 
-    // Correção Crítica: Usar Long (maiúsculo) para aceitar null
     @Column(name = "cliente_id")
     private Long clienteId;
 
@@ -38,23 +34,24 @@ public class Conta {
     @Enumerated(EnumType.STRING)
     private Status status = Status.ATIVO;
 
-    public Conta(ContaRequestDTO data){
-        this.nome = data.nome();
-        this.tipo = data.tipo();
-        this.recorrencia = data.recorrencia();
-        this.descricao = data.descricao();
-        this.status = data.status() != null ? data.status() : Status.ATIVO;
-
-        atribuirRelacionamentos(data);
+    public Conta(ContaRequestDTO data) {
+        this.atualizarDados(data);
     }
 
-    // Método encapsulado para não poluir o construtor
-    public void atribuirRelacionamentos(ContaRequestDTO data) {
+    public void atualizarDados(ContaRequestDTO data) {
+        this.nome = data.nome();
+        this.tipo = data.tipo();
+        this.descricao = data.descricao();
+        this.status = data.status() != null ? data.status() : Status.ATIVO;
+        this.ajustarRelacionamentos(data.clienteId(), data.fornecedorId());
+    }
+
+    private void ajustarRelacionamentos(Long clienteId, Long fornecedorId) {
         if (this.tipo == TipoConta.RECEITA) {
-            this.clienteId = data.clienteId();
+            this.clienteId = clienteId;
             this.fornecedorId = null;
-        } else if (this.tipo == TipoConta.DESPESA) {
-            this.fornecedorId = data.fornecedorId();
+        } else {
+            this.fornecedorId = fornecedorId;
             this.clienteId = null;
         }
     }
