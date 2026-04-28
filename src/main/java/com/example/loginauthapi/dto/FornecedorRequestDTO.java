@@ -5,8 +5,7 @@ import com.example.loginauthapi.model.TipoPessoa;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.br.CNPJ;
-import org.hibernate.validator.constraints.br.CPF;
+
 
 public record FornecedorRequestDTO(
         @NotBlank(message = "O nome ou razão social é obrigatório") String nomeOuNomeFantasia,

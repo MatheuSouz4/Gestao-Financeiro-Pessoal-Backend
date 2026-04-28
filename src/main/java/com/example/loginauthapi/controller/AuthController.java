@@ -1,4 +1,4 @@
-package com.example.loginauthapi.controllers;
+package com.example.loginauthapi.controller;
 
 import com.example.loginauthapi.model.User;
 import com.example.loginauthapi.dto.LoginRequestDTO;
