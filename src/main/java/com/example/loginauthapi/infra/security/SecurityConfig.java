@@ -8,7 +8,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,45 +23,37 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     @Autowired
-    SecurityFilter securityFilter; // Seu filtro que valida o Token JWT
+    SecurityFilter securityFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf(csrf -> csrf.disable()) // Desabilita CSRF
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        .requestMatchers(HttpMethod.GET, "/clientes").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/clientes/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/clientes").authenticated() // Deve estar assim se precisa de token
-                        .requestMatchers(HttpMethod.PUT, "/clientes/**").authenticated() // Seu PUT já está passando por isso
-
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Libera Preflight para todas as rotas
                         .anyRequest().authenticated()
                 )
-                // ADICIONE ISTO: Configuração de CORS explicita no Security
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Aplica a config de CORS
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
-    // Bean necessário para liberar o CORS globalmente no Spring Security
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200")); // Sua URL do Front
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT"));
-        configuration.setAllowedHeaders(Arrays.asList("*")); // Permite todos os headers (incluindo Authorization)
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        // PATCH adicionado para permitir a quitação de lançamentos
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

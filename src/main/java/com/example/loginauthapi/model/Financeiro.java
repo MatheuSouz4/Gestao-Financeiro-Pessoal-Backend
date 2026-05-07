@@ -17,6 +17,12 @@ public class Financeiro {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(name = "motivo_alteracao")
+    private String motivoAlteracao;
+
+    @Column(name = "id_referencia")
+    private Long idReferencia;
+
     @ManyToOne
     @JoinColumn(name = "conta_id", nullable = false)
     private Conta conta;
@@ -32,6 +38,7 @@ public class Financeiro {
     private BigDecimal valorPago;
     private String comprovanteUrl;
     private String descricao;
+
 
     // Método auxiliar para o Front-end identificar se é entrada ou saída
     public String getTipo() {

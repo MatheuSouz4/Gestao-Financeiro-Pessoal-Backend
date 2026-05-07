@@ -2,18 +2,18 @@ package com.example.loginauthapi.services;
 
 import com.example.loginauthapi.dto.DashboardResumoDTO;
 import com.example.loginauthapi.dto.FinanceiroRequestDTO;
-import com.example.loginauthapi.dto.QuitacaoRequestDTO;
-import com.example.loginauthapi.model.Conta;
-import com.example.loginauthapi.model.Financeiro;
-import com.example.loginauthapi.model.StatusLancamento;
+import com.example.loginauthapi.model.*;
 import com.example.loginauthapi.repositories.ContaRepository;
 import com.example.loginauthapi.repositories.FinanceiroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,43 +30,98 @@ public class FinanceiroService {
     }
 
     @Transactional
-    public Financeiro salvar(FinanceiroRequestDTO dto) {
+    public List<Financeiro> salvar(FinanceiroRequestDTO dto) {
         Conta conta = contaRepository.findById(dto.contaId())
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
 
-        Financeiro registro;
+        List<Financeiro> registrosGerados = new ArrayList<>();
+
+        // Se for uma atualização (tem ID), atualiza apenas um registro e ignora a recorrência
         if (dto.id() != null) {
-            registro = repository.findById(dto.id()).orElse(new Financeiro());
-        } else {
-            registro = new Financeiro();
+            Financeiro registro = repository.findById(dto.id()).orElseThrow();
+            registro.setConta(conta);
+            registro.setDataVencimento(dto.vencimento());
+            registro.setValor(dto.valor());
+            registro.setDescricao(dto.descricao());
+            registro.setMotivoAlteracao(dto.motivoAlteracao());
+
+            if (registro.getStatus() != StatusLancamento.PAGA) {
+                registro.setStatus(dto.vencimento().isBefore(LocalDate.now()) ? StatusLancamento.VENCIDA : StatusLancamento.PENDENTE);
+            }
+            registrosGerados.add(repository.save(registro));
+            return registrosGerados;
+        }
+
+        // Lógica de Criação com Recorrência
+        int qtd = (dto.tipoRecorrencia() != null && dto.tipoRecorrencia() != TipoRecorrencia.NENHUMA && dto.quantidadeParcelas() != null)
+                ? dto.quantidadeParcelas() : 1;
+
+        for (int i = 0; i < qtd; i++) {
+            Financeiro registro = new Financeiro();
             registro.setDataEmissao(LocalDate.now());
+            registro.setConta(conta);
+            registro.setValor(dto.valor());
+
+            // Adiciona a marcação (1/12), (2/12) se houver mais de uma parcela
+            String sufixoParcela = qtd > 1 ? " (" + (i + 1) + "/" + qtd + ")" : "";
+            registro.setDescricao(dto.descricao() + sufixoParcela);
+
+            // Calcula o vencimento baseado na recorrência
+            LocalDate vencimentoCalculado = dto.vencimento();
+            if (dto.tipoRecorrencia() == TipoRecorrencia.MENSAL) {
+                vencimentoCalculado = vencimentoCalculado.plusMonths(i);
+            } else if (dto.tipoRecorrencia() == TipoRecorrencia.SEMESTRAL) {
+                vencimentoCalculado = vencimentoCalculado.plusMonths(6L * i);
+            } else if (dto.tipoRecorrencia() == TipoRecorrencia.ANUAL) {
+                vencimentoCalculado = vencimentoCalculado.plusYears(i);
+            }
+
+            registro.setDataVencimento(vencimentoCalculado);
+            registro.setStatus(vencimentoCalculado.isBefore(LocalDate.now()) ? StatusLancamento.VENCIDA : StatusLancamento.PENDENTE);
+
+            registrosGerados.add(repository.save(registro));
         }
 
-        registro.setConta(conta);
-        registro.setDataVencimento(dto.vencimento());
-        registro.setValor(dto.valor());
-        registro.setDescricao(dto.descricao());
-
-        // Só altera status se não estiver pago
-        if (registro.getStatus() != StatusLancamento.PAGA) {
-            registro.setStatus(dto.vencimento().isBefore(LocalDate.now())
-                    ? StatusLancamento.VENCIDA : StatusLancamento.PENDENTE);
-        }
-
-        return repository.save(registro);
+        return registrosGerados;
     }
 
     @Transactional
-    public Financeiro registrarQuitacao(Long id, QuitacaoRequestDTO dto) {
-        Financeiro registro = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Registro financeiro não encontrado"));
+    public Financeiro quitarLancamento(Long id, BigDecimal valorPago, LocalDate dataPagamento, MultipartFile comprovante) {
+        Financeiro original = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lançamento não encontrado"));
 
-        registro.setDataPagamento(dto.dataPagamento());
-        registro.setValorPago(dto.valorPago());
-        registro.setComprovanteUrl(dto.comprovanteUrl());
-        registro.setStatus(StatusLancamento.PAGA);
+        BigDecimal valorOriginal = original.getValor();
 
-        return repository.save(registro);
+        if (valorPago.compareTo(valorOriginal) < 0) {
+            // LÓGICA DE PAGAMENTO PARCIAL
+            BigDecimal restante = valorOriginal.subtract(valorPago);
+
+            // 1. Atualiza o original para o valor pago e status parcial
+            original.setValor(valorPago);
+            original.setValorPago(valorPago);
+            original.setDataPagamento(dataPagamento);
+            original.setStatus(StatusLancamento.PAGAMENTO_PARCIAL);
+
+            // 2. Cria um novo lançamento com o saldo restante
+            Financeiro novoLancamento = new Financeiro();
+            novoLancamento.setConta(original.getConta());
+            novoLancamento.setDescricao(original.getDescricao() + " (Saldo)");
+            novoLancamento.setValor(restante);
+            novoLancamento.setDataEmissao(LocalDate.now());
+            novoLancamento.setDataVencimento(original.getDataVencimento()); // Ou data sugerida pelo usuário
+            novoLancamento.setStatus(StatusLancamento.PENDENTE);
+            novoLancamento.setIdReferencia(original.getId()); // Referência ao ID anterior
+
+            repository.save(novoLancamento);
+        } else {
+            // LÓGICA DE QUITAÇÃO TOTAL
+            original.setValorPago(valorPago);
+            original.setDataPagamento(dataPagamento);
+            original.setStatus(StatusLancamento.PAGA);
+        }
+
+        // Salvar comprovante se houver (sua lógica de upload aqui)
+        return repository.save(original);
     }
 
     public DashboardResumoDTO obterResumoMesAtual() {
@@ -93,5 +148,10 @@ public class FinanceiroService {
                 .count();
 
         return new DashboardResumoDTO(receitasPagas, despesasPagas, pendentes);
+    }
+
+    public List<Financeiro> buscarComFiltros(String status, String tipo, Long contaId, LocalDate inicio, LocalDate fim) {
+        Specification<Financeiro> spec = FinanceiroSpecification.comFiltros(status, tipo, contaId, inicio, fim);
+        return repository.findAll(spec);
     }
 }
