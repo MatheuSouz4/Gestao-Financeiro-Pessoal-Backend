@@ -3,8 +3,12 @@ package com.example.loginauthapi.controller;
 import com.example.loginauthapi.dto.DashboardResumoDTO;
 import com.example.loginauthapi.dto.FinanceiroRequestDTO;
 import com.example.loginauthapi.model.Financeiro;
+import com.example.loginauthapi.model.FinanceiroSpecification;
+import com.example.loginauthapi.model.StatusLancamento;
+import com.example.loginauthapi.model.TipoConta;
 import com.example.loginauthapi.services.FinanceiroService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -66,14 +70,14 @@ public class FinanceiroController {
     }
 
     @GetMapping("/filtro")
-    public ResponseEntity<List<Financeiro>> buscarComFiltros(
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String tipo,
+    public ResponseEntity<List<Financeiro>> filtrar(
+            @RequestParam(required = false) StatusLancamento status,
+            @RequestParam(required = false) TipoConta tipo,
             @RequestParam(required = false) Long contaId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim) {
-
-        // Aqui você pode usar uma Specification do Spring Data JPA ou uma Query customizada
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim
+    ) {
+        Specification<Financeiro> spec = FinanceiroSpecification.comFiltros(status, tipo, contaId, inicio, fim);
         return ResponseEntity.ok(service.buscarComFiltros(status, tipo, contaId, inicio, fim));
     }
 

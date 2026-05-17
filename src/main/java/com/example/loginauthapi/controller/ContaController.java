@@ -2,6 +2,8 @@ package com.example.loginauthapi.controller;
 
 import com.example.loginauthapi.dto.ContaRequestDTO;
 import com.example.loginauthapi.dto.ContaResponseDTO;
+import com.example.loginauthapi.model.Status;
+import com.example.loginauthapi.model.TipoConta;
 import com.example.loginauthapi.services.ContaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +27,11 @@ public class ContaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ContaResponseDTO>> listar() {
-        return ResponseEntity.ok(service.listarTodas());
+    public ResponseEntity<List<ContaResponseDTO>> listar(
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) TipoConta tipo
+    ) {
+        return ResponseEntity.ok(service.listarComFiltros(status, tipo));
     }
 
     @GetMapping("/{id}")

@@ -3,6 +3,7 @@ package com.example.loginauthapi.services;
 import com.example.loginauthapi.dto.ContaRequestDTO;
 import com.example.loginauthapi.dto.ContaResponseDTO;
 import com.example.loginauthapi.model.Conta;
+import com.example.loginauthapi.model.Status;
 import com.example.loginauthapi.model.TipoConta;
 import com.example.loginauthapi.repositories.ContaRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -62,5 +63,11 @@ public class ContaService {
         if (data.tipo() == TipoConta.DESPESA && data.fornecedorId() == null) {
             throw new IllegalArgumentException("Despesas exigem um Fornecedor vinculado.");
         }
+    }
+
+    public List<ContaResponseDTO> listarComFiltros(Status status, TipoConta tipo) {
+        return repository.findByFiltros(status, tipo).stream()
+                .map(ContaResponseDTO::new)
+                .toList();
     }
 }
