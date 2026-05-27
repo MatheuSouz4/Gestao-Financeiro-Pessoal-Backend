@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -69,5 +71,18 @@ public class ContaService {
         return repository.findByFiltros(status, tipo).stream()
                 .map(ContaResponseDTO::new)
                 .toList();
+    }
+
+    public BigDecimal obterSaldoAtual(Long id) {
+        Conta conta = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
+        return conta.getSaldoAtual(); // Retorna o campo saldoAtual da entidade Conta
+    }
+
+    public BigDecimal obterSaldoConsolidado() {
+        List<Conta> contas = repository.findAll();
+        return contas.stream()
+                .map(Conta::getSaldoAtual)
+                .reduce(BigDecimal.ZERO, BigDecimal::add); // Soma o saldo de todas as contas cadastradas
     }
 }

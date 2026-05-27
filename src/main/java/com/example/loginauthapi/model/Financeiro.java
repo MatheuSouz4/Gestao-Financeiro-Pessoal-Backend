@@ -20,6 +20,9 @@ public class Financeiro {
     @Column(name = "motivo_alteracao")
     private String motivoAlteracao;
 
+    @Column(name = "justificativa_estorno")
+    private String justificativaEstorno;
+
     @Column(name = "id_referencia")
     private Long idReferencia;
 

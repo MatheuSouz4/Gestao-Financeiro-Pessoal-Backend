@@ -4,9 +4,12 @@ import com.example.loginauthapi.dto.ContaRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Table(name = "contas")
-@Entity(name = "conta")
-@Getter @Setter
+@Entity(name = "Conta")
+@Getter
+@Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder // Facilita a criação em testes
 @EqualsAndHashCode(of = "id")
@@ -33,6 +36,13 @@ public class Conta {
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.ATIVO;
+
+    @Column(name = "saldo_atual", precision = 19, scale = 2)
+    private BigDecimal saldoAtual = BigDecimal.ZERO;
+
+    public BigDecimal getSaldoAtual() {
+        return this.saldoAtual != null ? this.saldoAtual : BigDecimal.ZERO;
+    }
 
     public Conta(ContaRequestDTO data) {
         this.atualizarDados(data);

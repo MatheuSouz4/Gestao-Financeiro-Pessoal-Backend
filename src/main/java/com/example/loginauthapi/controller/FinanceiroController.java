@@ -1,6 +1,7 @@
 package com.example.loginauthapi.controller;
 
-import com.example.loginauthapi.dto.DashboardResumoDTO;
+import com.example.loginauthapi.dto.GraficoDashboardDTO;
+import com.example.loginauthapi.dto.ResumoDashboardDTO;
 import com.example.loginauthapi.dto.FinanceiroRequestDTO;
 import com.example.loginauthapi.model.Financeiro;
 import com.example.loginauthapi.model.FinanceiroSpecification;
@@ -34,7 +35,6 @@ public class FinanceiroController {
     }
 
     // 2. Criar novo lançamento (com ou sem recorrência)
-    // Retorna uma lista de Financeiro, pois a recorrência gera múltiplos registros de uma vez
     @PostMapping
     public ResponseEntity<List<Financeiro>> criar(@RequestBody FinanceiroRequestDTO dto) {
         return ResponseEntity.ok(service.salvar(dto));
@@ -43,7 +43,6 @@ public class FinanceiroController {
     // 3. Atualizar um lançamento existente
     @PutMapping("/{id}")
     public ResponseEntity<List<Financeiro>> atualizar(@PathVariable Long id, @RequestBody FinanceiroRequestDTO dto) {
-        // Garantindo que o ID da URL seja passado para o DTO (caso o front-end não envie no corpo)
         FinanceiroRequestDTO dtoComId = new FinanceiroRequestDTO(
                 id,
                 dto.contaId(),
@@ -57,18 +56,31 @@ public class FinanceiroController {
         return ResponseEntity.ok(service.salvar(dtoComId));
     }
 
-    // 4. Quitar lançamento com upload de comprovante opcional
-    // Utiliza consumes = MULTIPART_FORM_DATA_VALUE para aceitar o arquivo enviado pelo Angular (FormData)
+    // 4. Quitar lançamento
     @PatchMapping(value = "/{id}/quitar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Financeiro> quitar(
             @PathVariable Long id,
             @RequestParam("dataPagamento") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataPagamento,
             @RequestParam("valorPago") BigDecimal valorPago,
+            @RequestParam(value = "novaDataVencimento", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate novaDataVencimento,
             @RequestParam(value = "comprovante", required = false) MultipartFile comprovante) {
 
-        return ResponseEntity.ok(service.quitarLancamento(id, valorPago, dataPagamento, comprovante));
+        return ResponseEntity.ok(service.quitarLancamento(id, valorPago, dataPagamento, novaDataVencimento, comprovante));
     }
 
+    // 5. Estornar lançamento
+    @PatchMapping("/{id}/estornar")
+    public ResponseEntity<Financeiro> estornar(@PathVariable Long id, @RequestBody java.util.Map<String, Object> payload) {
+        String justificativa = (String) payload.get("justificativaEstorno");
+        Boolean retornarPendente = (Boolean) payload.get("retornarPendente");
+
+        // Proteção contra nulos
+        if (retornarPendente == null) retornarPendente = false;
+
+        return ResponseEntity.ok(service.estornarLancamento(id,justificativa, retornarPendente));
+    }
+
+    // 6. Filtrar lançamentos
     @GetMapping("/filtro")
     public ResponseEntity<List<Financeiro>> filtrar(
             @RequestParam(required = false) StatusLancamento status,
@@ -77,13 +89,22 @@ public class FinanceiroController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim
     ) {
-        Specification<Financeiro> spec = FinanceiroSpecification.comFiltros(status, tipo, contaId, inicio, fim);
         return ResponseEntity.ok(service.buscarComFiltros(status, tipo, contaId, inicio, fim));
     }
 
-    // 5. Obter resumo para o Dashboard
+    // ==========================================
+    // ENDPOINTS DO DASHBOARD
+    // ==========================================
+
     @GetMapping("/resumo")
-    public ResponseEntity<DashboardResumoDTO> getResumo() {
-        return ResponseEntity.ok(service.obterResumoMesAtual());
+    public ResponseEntity<ResumoDashboardDTO> getResumo() {
+        // Atualizado para chamar o novo método centralizado
+        return ResponseEntity.ok(service.obterResumoFinanceiro());
+    }
+
+    @GetMapping("/grafico")
+    public ResponseEntity<List<GraficoDashboardDTO>> getGrafico() {
+        // Novo endpoint responsável por alimentar a linha de fluxo de caixa no front-end
+        return ResponseEntity.ok(service.obterDadosGrafico());
     }
 }

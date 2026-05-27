@@ -1,9 +1,9 @@
 package com.example.loginauthapi.services;
 
-import com.example.loginauthapi.dto.DashboardResumoDTO;
+import com.example.loginauthapi.dto.GraficoDashboardDTO;
+import com.example.loginauthapi.dto.ResumoDashboardDTO;
 import com.example.loginauthapi.dto.FinanceiroRequestDTO;
 import com.example.loginauthapi.model.*;
-import com.example.loginauthapi.model.StatusLancamento;
 import com.example.loginauthapi.repositories.ContaRepository;
 import com.example.loginauthapi.repositories.FinanceiroRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +26,17 @@ public class FinanceiroService {
     @Autowired
     private ContaRepository contaRepository;
 
+    // ==========================================
+    // MÉTODOS DE CADASTRO E MOVIMENTAÇÃO
+    // ==========================================
+
     public List<Financeiro> listarTodos() {
         return repository.findAll();
+    }
+
+    public List<Financeiro> buscarComFiltros(StatusLancamento status, TipoConta tipo, Long contaId, LocalDate inicio, LocalDate fim) {
+        Specification<Financeiro> spec = FinanceiroSpecification.comFiltros(status, tipo, contaId, inicio, fim);
+        return repository.findAll(spec);
     }
 
     @Transactional
@@ -95,7 +104,129 @@ public class FinanceiroService {
         return registrosGerados;
     }
 
-    // Método auxiliar para organizar o cálculo de datas
+    @Transactional
+    public Financeiro quitarLancamento(Long id, BigDecimal valorPago, LocalDate dataPagamento, LocalDate novaDataVencimento, MultipartFile comprovante) {
+        Financeiro original = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lançamento não encontrado"));
+        BigDecimal valorOriginal = original.getValor();
+
+        if (valorPago.compareTo(valorOriginal) < 0) {
+            // LÓGICA DE PAGAMENTO PARCIAL
+            BigDecimal restante = valorOriginal.subtract(valorPago);
+
+            original.setValorPago(valorPago);
+            original.setDataPagamento(dataPagamento);
+            original.setStatus(StatusLancamento.PAGAMENTO_PARCIAL);
+
+            Financeiro novoLancamento = new Financeiro();
+            novoLancamento.setConta(original.getConta());
+            novoLancamento.setDescricao(original.getDescricao() + " (Saldo)");
+            novoLancamento.setValor(restante);
+            novoLancamento.setDataEmissao(LocalDate.now());
+
+            if (novaDataVencimento != null) {
+                novoLancamento.setDataVencimento(novaDataVencimento);
+            } else {
+                novoLancamento.setDataVencimento(original.getDataVencimento());
+            }
+
+            novoLancamento.setStatus(StatusLancamento.PENDENTE);
+            novoLancamento.setIdReferencia(original.getId());
+
+            repository.save(novoLancamento);
+        } else {
+            // LÓGICA DE QUITAÇÃO TOTAL
+            original.setValorPago(valorPago);
+            original.setDataPagamento(dataPagamento);
+            original.setStatus(StatusLancamento.PAGA);
+        }
+
+        Financeiro resultado = repository.save(original);
+        this.atualizarSaldoConta(original.getConta().getId());
+
+        return resultado;
+    }
+
+    @Transactional
+    public Financeiro estornarLancamento(Long id, String justificativa, boolean retornarPendente) {
+        Financeiro lancamento = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lançamento não encontrado"));
+
+        if (lancamento.getStatus() != StatusLancamento.PAGA &&
+                lancamento.getStatus() != StatusLancamento.PAGAMENTO_PARCIAL) {
+            throw new IllegalStateException("Apenas lançamentos pagos ou parciais podem ser estornados.");
+        }
+
+        Long contaId = lancamento.getConta().getId();
+
+        // Limpa os residuais se o pagamento original foi parcial
+        if (lancamento.getStatus() == StatusLancamento.PAGAMENTO_PARCIAL) {
+            List<Financeiro> residuais = repository.findByIdReferencia(lancamento.getId());
+            if (!residuais.isEmpty()) {
+                repository.deleteAll(residuais);
+            }
+        }
+
+        if (retornarPendente) {
+            // Opção 1: Desfazer Pagamento
+            // Verifica se a data original já venceu para aplicar o status correto
+            if (lancamento.getDataVencimento().isBefore(LocalDate.now())) {
+                lancamento.setStatus(StatusLancamento.VENCIDA);
+            } else {
+                lancamento.setStatus(StatusLancamento.PENDENTE);
+            }
+            // Como o pagamento foi "desfeito", limpamos os rastros
+            lancamento.setValorPago(null);
+            lancamento.setDataPagamento(null);
+        } else {
+            // Opção 2: Estorno definitivo
+            lancamento.setStatus(StatusLancamento.ESTORNADA);
+        }
+
+        lancamento.setJustificativaEstorno(justificativa);
+
+        Financeiro resultado = repository.save(lancamento);
+        this.atualizarSaldoConta(contaId);
+
+        return resultado;
+    }
+
+    // ==========================================
+    // MÉTODOS DO DASHBOARD (INTEGRADOS)
+    // ==========================================
+
+    public ResumoDashboardDTO obterResumoFinanceiro() {
+        // Usa as consultas JPQL para garantir cálculos rápidos pelo banco
+        BigDecimal recPagas = tratarNulo(repository.sumReceitasRecebidas());
+        BigDecimal recPend = tratarNulo(repository.sumReceitasPendentes());
+        BigDecimal despPagas = tratarNulo(repository.sumDespesasPagas());
+        BigDecimal despPend = tratarNulo(repository.sumDespesasPendentes());
+
+        BigDecimal totalPago = recPagas.subtract(despPagas);
+        BigDecimal totalPendente = recPend.subtract(despPend);
+        Long qtdPendentes = repository.countPendentes();
+
+        return new ResumoDashboardDTO(
+                recPagas, recPend, despPagas, despPend,
+                totalPago, totalPendente, qtdPendentes
+        );
+    }
+
+    public List<GraficoDashboardDTO> obterDadosGrafico() {
+        return repository.buscarDadosGrafico(LocalDate.now().minusDays(30));
+    }
+
+    public BigDecimal calcularSaldoConsolidado(LocalDate inicio, LocalDate fim, Long contaId) {
+        if (inicio == null && fim == null) {
+            return contaRepository.obterSaldoConsolidadoSemFiltroData(contaId);
+        }
+        return contaRepository.obterSaldoConsolidadoComFiltro(inicio, fim, contaId);
+    }
+
+    // ==========================================
+    // MÉTODOS AUXILIARES
+    // ==========================================
+
     private LocalDate calcularVencimento(LocalDate dataBase, TipoRecorrencia tipo, int incremento) {
         if (tipo == null) return dataBase;
 
@@ -107,74 +238,21 @@ public class FinanceiroService {
         };
     }
 
+    private void atualizarSaldoConta(Long contaId) {
+        BigDecimal totalReceitas = tratarNulo(repository.sumReceitasRecebidasByConta(contaId));
+        BigDecimal totalDespesas = tratarNulo(repository.sumDespesasPagasByConta(contaId));
 
-    @Transactional
-    public Financeiro quitarLancamento(Long id, BigDecimal valorPago, LocalDate dataPagamento, MultipartFile comprovante) {
-        Financeiro original = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lançamento não encontrado"));
+        BigDecimal saldoCalculado = totalReceitas.subtract(totalDespesas);
 
-        BigDecimal valorOriginal = original.getValor();
+        Conta conta = contaRepository.findById(contaId)
+                .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
 
-        if (valorPago.compareTo(valorOriginal) < 0) {
-            // LÓGICA DE PAGAMENTO PARCIAL
-            BigDecimal restante = valorOriginal.subtract(valorPago);
-
-            // 1. Atualiza o original para o valor pago e status parcial
-            original.setValor(valorPago);
-            original.setValorPago(valorPago);
-            original.setDataPagamento(dataPagamento);
-            original.setStatus(StatusLancamento.PAGAMENTO_PARCIAL);
-
-            // 2. Cria um novo lançamento com o saldo restante
-            Financeiro novoLancamento = new Financeiro();
-            novoLancamento.setConta(original.getConta());
-            novoLancamento.setDescricao(original.getDescricao() + " (Saldo)");
-            novoLancamento.setValor(restante);
-            novoLancamento.setDataEmissao(LocalDate.now());
-            novoLancamento.setDataVencimento(original.getDataVencimento()); // Ou data sugerida pelo usuário
-            novoLancamento.setStatus(StatusLancamento.PENDENTE);
-            novoLancamento.setIdReferencia(original.getId()); // Referência ao ID anterior
-
-            repository.save(novoLancamento);
-        } else {
-            // LÓGICA DE QUITAÇÃO TOTAL
-            original.setValorPago(valorPago);
-            original.setDataPagamento(dataPagamento);
-            original.setStatus(StatusLancamento.PAGA);
-        }
-
-        // Salvar comprovante se houver (sua lógica de upload aqui)
-        return repository.save(original);
+        conta.setSaldoAtual(saldoCalculado);
+        contaRepository.save(conta);
     }
 
-    public DashboardResumoDTO obterResumoMesAtual() {
-        LocalDate inicio = LocalDate.now().withDayOfMonth(1);
-        LocalDate fim = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
-
-        // Idealmente, usar uma Query customizada no Repository para performance
-        List<Financeiro> registrosMes = repository.findAll().stream()
-                .filter(f -> !f.getDataVencimento().isBefore(inicio) && !f.getDataVencimento().isAfter(fim))
-                .toList();
-
-        BigDecimal receitasPagas = registrosMes.stream()
-                .filter(f -> f.getTipo().equals("RECEITA") && f.getStatus() == StatusLancamento.PAGA)
-                .map(Financeiro::getValorPago)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal despesasPagas = registrosMes.stream()
-                .filter(f -> f.getTipo().equals("DESPESA") && f.getStatus() == StatusLancamento.PAGA)
-                .map(Financeiro::getValorPago)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        long pendentes = registrosMes.stream()
-                .filter(f -> f.getStatus() != StatusLancamento.PAGA)
-                .count();
-
-        return new DashboardResumoDTO(receitasPagas, despesasPagas, pendentes);
-    }
-
-    public List<Financeiro> buscarComFiltros(StatusLancamento status, TipoConta tipo, Long contaId, LocalDate inicio, LocalDate fim) {
-        Specification<Financeiro> spec = FinanceiroSpecification.comFiltros(status, tipo, contaId, inicio, fim);
-        return repository.findAll(spec);
+    // Evita NullPointerException caso o repositório retorne null em somas vazias
+    private BigDecimal tratarNulo(BigDecimal valor) {
+        return valor != null ? valor : BigDecimal.ZERO;
     }
 }

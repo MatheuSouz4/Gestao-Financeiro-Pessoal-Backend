@@ -13,4 +13,8 @@ public record FinanceiroRequestDTO(
         TipoRecorrencia tipoRecorrencia,
         Integer quantidadeParcelas, // Obrigatório se a recorrência não for NENHUMA
         String motivoAlteracao
-) {}
+) {
+    public static FinanceiroRequestDTO simples(Long contaId, LocalDate venc, BigDecimal valor, String desc) {
+        return new FinanceiroRequestDTO(null, contaId, venc, valor, desc, null, 1, null);
+    }
+}

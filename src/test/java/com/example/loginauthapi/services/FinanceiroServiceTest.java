@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,17 +39,27 @@ class FinanceiroServiceTest {
     void deveSalvarComStatusVencido() {
         // ARRANGE
         FinanceiroRequestDTO dto = new FinanceiroRequestDTO(
-                null, 1L, LocalDate.now().minusDays(10), new BigDecimal("250.00"), "Aluguel"
+                null,
+                1L,
+                LocalDate.now().minusDays(10),
+                new BigDecimal("250.00"),
+                "Aluguel",
+                null,
+                1,
+                null
         );
-        Conta contaMock = new Conta();
 
+        Conta contaMock = new Conta();
         when(contaRepository.findById(1L)).thenReturn(Optional.of(contaMock));
         when(repository.save(any(Financeiro.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // ACT
-        Financeiro resultado = service.salvar(dto);
+        // Corrigido: Agora recebemos a lista retornada pelo serviço
+        List<Financeiro> resultados = service.salvar(dto);
 
         // ASSERT
+        assertFalse(resultados.isEmpty(), "A lista de resultados não deve ser vazia");
+        Financeiro resultado = resultados.get(0); // Pegamos a primeira parcela para validar
         assertEquals(StatusLancamento.VENCIDA, resultado.getStatus());
         verify(repository, times(1)).save(any());
     }
