@@ -78,11 +78,4 @@ public class ContaService {
                 .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
         return conta.getSaldoAtual(); // Retorna o campo saldoAtual da entidade Conta
     }
-
-    public BigDecimal obterSaldoConsolidado() {
-        List<Conta> contas = repository.findAll();
-        return contas.stream()
-                .map(Conta::getSaldoAtual)
-                .reduce(BigDecimal.ZERO, BigDecimal::add); // Soma o saldo de todas as contas cadastradas
-    }
 }

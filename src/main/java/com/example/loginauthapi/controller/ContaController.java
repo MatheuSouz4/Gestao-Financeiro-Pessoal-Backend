@@ -61,15 +61,4 @@ public class ContaController {
         return ResponseEntity.ok(service.obterSaldoAtual(id));
     }
 
-    // ENDPOINT ATUALIZADO: GET /contas/saldo-total (Com suporte aos filtros do dashboard)
-    @GetMapping("/saldo-total")
-    public ResponseEntity<BigDecimal> obterSaldoConsolidado(
-            @RequestParam(value = "inicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
-            @RequestParam(value = "fim", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
-            @RequestParam(value = "contaId", required = false) Long contaId) {
-
-        // Delega para o FinanceiroService que centraliza as métricas do painel
-        BigDecimal saldo = financeiroService.calcularSaldoConsolidado(inicio, fim, contaId);
-        return ResponseEntity.ok(saldo);
-    }
 }
