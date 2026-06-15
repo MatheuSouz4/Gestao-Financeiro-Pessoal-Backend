@@ -9,7 +9,6 @@ public record FinanceiroRequestDTO(
         Long id,
         Long contaId,
 
-        // CORREÇÃO: Informar ao Jackson o padrão exato esperado do Angular
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
         LocalDate vencimento,
 

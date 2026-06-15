@@ -66,9 +66,7 @@ public class ContaService {
         repository.deleteById(id);
     }
 
-    /**
-     * Valida os vínculos e impede relacionamentos com entidades INATIVAS
-     */
+     //Valida os vínculos e impede relacionamentos com entidades INATIVAS
     private void validarVinculoObrigatorio(ContaRequestDTO data) {
         if (data.tipo() == TipoConta.RECEITA) {
             if (data.clienteId() == null) {
@@ -95,9 +93,7 @@ public class ContaService {
         }
     }
 
-    /**
-     * Valida se já existe uma conta com o mesmo nome, mesmo tipo e para o mesmo cliente/fornecedor.
-     */
+      //Valida se já existe uma conta com o mesmo nome, mesmo tipo e para o mesmo cliente/fornecedor.
     private void validarDuplicidadeConta(ContaRequestDTO data, Long idAtual) {
         String nomeFormatado = data.nome().trim(); // Remove espaços extras no início e fim
 

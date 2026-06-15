@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/clientes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Importante para conexão com o Angular em dev
+@CrossOrigin(origins = "*")
 public class ClienteController {
 
     private final ClienteService service;

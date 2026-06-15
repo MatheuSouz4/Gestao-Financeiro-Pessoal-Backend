@@ -25,10 +25,8 @@ public class FinanceiroService {
     @Autowired
     private ContaRepository contaRepository;
 
-    // ==========================================
-    // MÉTODOS DE CADASTRO E MOVIMENTAÇÃO
-    // ==========================================
 
+    // MÉTODOS DE CADASTRO E MOVIMENTAÇÃO
     public List<Financeiro> listarTodos() {
         return repository.findAll();
     }
@@ -43,7 +41,6 @@ public class FinanceiroService {
         Conta conta = contaRepository.findById(dto.contaId())
                 .orElseThrow(() -> new EntityNotFoundException("Conta não encontrada."));
 
-        // CORREÇÃO: Comparação de Enum ao invés de String e lançamento da exceção correta
         if (conta.getStatus() == Status.INATIVO || conta.getStatus() == Status.BLOQUEADO) {
             throw new IllegalArgumentException("Não é permitido realizar lançamentos para uma conta " + conta.getStatus() + ".");
         }
@@ -152,10 +149,7 @@ public class FinanceiroService {
         return resultado;
     }
 
-    // ==========================================
     // MÉTODOS AUXILIARES
-    // ==========================================
-
     private LocalDate calcularVencimento(LocalDate dataBase, TipoRecorrencia tipo, int incremento) {
         if (tipo == null) return dataBase;
         return switch (tipo) {

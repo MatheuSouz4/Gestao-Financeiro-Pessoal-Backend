@@ -12,7 +12,7 @@ import java.util.List;
 
 
 @Service
-@RequiredArgsConstructor // Substitui o @Autowired, melhor para testes
+@RequiredArgsConstructor
 public class ClienteService {
 
     private final ClienteRepository repository;

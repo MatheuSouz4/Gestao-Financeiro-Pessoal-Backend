@@ -19,7 +19,6 @@ public class Cliente extends Pessoa { // Aplicando a Herança
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Construtor usando o DTO
     public Cliente(ClienteRequestDTO data){
         super();
         this.setNomeOuNomeFantasia(data.nomeOuNomeFantasia());

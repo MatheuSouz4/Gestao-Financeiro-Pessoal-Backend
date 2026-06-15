@@ -24,7 +24,7 @@ import java.util.List;
 public class ContaController {
 
     private final ContaService service;
-    private final FinanceiroService financeiroService; // Injetado para prover os dados do dashboard
+    private final FinanceiroService financeiroService;
 
     @PostMapping
     public ResponseEntity<ContaResponseDTO> cadastrar(@RequestBody @Valid ContaRequestDTO data) {
