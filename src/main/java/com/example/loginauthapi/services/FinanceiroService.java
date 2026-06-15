@@ -4,6 +4,7 @@ import com.example.loginauthapi.dto.FinanceiroRequestDTO;
 import com.example.loginauthapi.model.*;
 import com.example.loginauthapi.repositories.ContaRepository;
 import com.example.loginauthapi.repositories.FinanceiroRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -40,17 +41,18 @@ public class FinanceiroService {
     @Transactional
     public List<Financeiro> salvar(FinanceiroRequestDTO dto) {
         Conta conta = contaRepository.findById(dto.contaId())
-                .orElseThrow(() -> new RuntimeException("Conta não encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Conta não encontrada."));
 
-        if ("INATIVO".equals(conta.getStatus())) {
-            throw new RuntimeException("Não é permitido realizar lançamentos para uma conta INATIVA.");
+        // CORREÇÃO: Comparação de Enum ao invés de String e lançamento da exceção correta
+        if (conta.getStatus() == Status.INATIVO || conta.getStatus() == Status.BLOQUEADO) {
+            throw new IllegalArgumentException("Não é permitido realizar lançamentos para uma conta " + conta.getStatus() + ".");
         }
 
         List<Financeiro> registrosGerados = new ArrayList<>();
 
         if (dto.id() != null) {
             Financeiro registro = repository.findById(dto.id())
-                    .orElseThrow(() -> new RuntimeException("Lançamento não encontrado"));
+                    .orElseThrow(() -> new EntityNotFoundException("Lançamento não encontrado."));
 
             registro.setConta(conta);
             registro.setDataVencimento(dto.vencimento());
@@ -92,10 +94,11 @@ public class FinanceiroService {
     @Transactional
     public Financeiro quitarLancamento(Long id, BigDecimal valorPago, LocalDate dataPagamento, LocalDate novaDataVencimento, MultipartFile comprovante) {
         Financeiro original = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lançamento não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Lançamento não encontrado para quitação."));
 
         if (valorPago.compareTo(original.getValor()) < 0) {
             BigDecimal restante = original.getValor().subtract(valorPago);
+
             original.setValorPago(valorPago);
             original.setDataPagamento(dataPagamento);
             original.setStatus(StatusLancamento.PAGAMENTO_PARCIAL);
@@ -124,10 +127,10 @@ public class FinanceiroService {
     @Transactional
     public Financeiro estornarLancamento(Long id, String justificativa, boolean retornarPendente) {
         Financeiro lancamento = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lançamento não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Lançamento não encontrado para estorno."));
 
         if (lancamento.getStatus() != StatusLancamento.PAGA && lancamento.getStatus() != StatusLancamento.PAGAMENTO_PARCIAL) {
-            throw new IllegalStateException("Apenas lançamentos pagos ou parciais podem ser estornados.");
+            throw new IllegalArgumentException("Apenas lançamentos pagos ou parciais podem ser estornados.");
         }
 
         if (lancamento.getStatus() == StatusLancamento.PAGAMENTO_PARCIAL) {
@@ -164,9 +167,8 @@ public class FinanceiroService {
     }
 
     private void atualizarSaldoConta(Long contaId) {
-        // Query mantida aqui apenas por necessidade de atualização de saldo da conta (escrita)
         BigDecimal saldoCalculado = repository.obterSaldoConsolidadoAteHoje(LocalDate.now(), contaId);
-        Conta conta = contaRepository.findById(contaId).orElseThrow(() -> new RuntimeException("Conta não encontrada"));
+        Conta conta = contaRepository.findById(contaId).orElseThrow(() -> new EntityNotFoundException("Conta não encontrada."));
         conta.setSaldoAtual(saldoCalculado);
         contaRepository.save(conta);
     }

@@ -6,10 +6,12 @@ import com.example.loginauthapi.model.TipoConta;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ContaRepository extends JpaRepository<Conta, Long> {
 
@@ -18,6 +20,10 @@ public interface ContaRepository extends JpaRepository<Conta, Long> {
             "(:tipo IS NULL OR c.tipo = :tipo)")
     List<Conta> findByFiltros(@Param("status") Status status,
                               @Param("tipo") TipoConta tipo);
+
+    Optional<Conta> findByNomeIgnoreCaseAndTipoAndClienteId(String nome, TipoConta tipo, Long clienteId);
+
+    Optional<Conta> findByNomeIgnoreCaseAndTipoAndFornecedorId(String nome, TipoConta tipo, Long fornecedorId);
 
     @Query("SELECT COALESCE(SUM(CASE WHEN c.tipo = 'RECEITA' THEN c.saldoAtual ELSE -c.saldoAtual END), 0) " +
             "FROM Conta c WHERE (:contaId IS NULL OR c.id = :contaId)")
