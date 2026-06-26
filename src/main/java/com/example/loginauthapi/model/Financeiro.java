@@ -6,16 +6,25 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "lancamentos")
+@Table(name = "financeiro")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
-public class Lancamento {
+public class Financeiro {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    private Long id;
+
+    @Column(name = "motivo_alteracao")
+    private String motivoAlteracao;
+
+    @Column(name = "justificativa_estorno")
+    private String justificativaEstorno;
+
+    @Column(name = "id_referencia")
+    private Long idReferencia;
 
     @ManyToOne
     @JoinColumn(name = "conta_id", nullable = false)
@@ -33,5 +42,9 @@ public class Lancamento {
     private String comprovanteUrl;
     private String descricao;
 
-    // Getters e Setters
+
+    // Método auxiliar para o Front-end identificar se é entrada ou saída
+    public String getTipo() {
+        return this.conta != null ? this.conta.getTipo().name() : null;
+    }
 }

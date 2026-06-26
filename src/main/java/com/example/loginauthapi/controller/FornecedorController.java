@@ -1,4 +1,4 @@
-package com.example.loginauthapi.controllers;
+package com.example.loginauthapi.controller;
 
 import com.example.loginauthapi.dto.FornecedorRequestDTO;
 import com.example.loginauthapi.dto.FornecedorResponseDTO;

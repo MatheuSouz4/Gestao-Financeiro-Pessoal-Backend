@@ -12,7 +12,7 @@ import java.util.List;
 
 
 @Service
-@RequiredArgsConstructor // Substitui o @Autowired, melhor para testes
+@RequiredArgsConstructor
 public class ClienteService {
 
     private final ClienteRepository repository;
@@ -32,6 +32,7 @@ public class ClienteService {
     @Transactional
     public ClienteResponseDTO salvar(ClienteRequestDTO data) {
         Cliente novoCliente = new Cliente(data);
+        novoCliente.validarConsistenciaDados();
         return new ClienteResponseDTO(repository.save(novoCliente));
     }
 
@@ -40,9 +41,13 @@ public class ClienteService {
         Cliente cliente = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado"));
 
-        // Atualização dos campos (Mantenha a lógica de negócio aqui)
-        cliente.setNome(data.nome());
-        cliente.setCpfCnpj(data.cpfCnpj()); // Ajustado para camelCase
+        // Atualização dos campos herdados e específicos
+        cliente.setNomeOuNomeFantasia(data.nomeOuNomeFantasia());
+        cliente.setRazaoSocial(data.razaoSocial());
+        cliente.setTipoPessoa(data.tipoPessoa());
+        cliente.setCpfCnpj(data.cpfCnpj());
+        cliente.setRg(data.rg());
+        cliente.setInscricaoEstadual(data.inscricaoEstadual());
         cliente.setEmail(data.email());
         cliente.setTelefone(data.telefone());
         cliente.setEndereco(data.endereco());

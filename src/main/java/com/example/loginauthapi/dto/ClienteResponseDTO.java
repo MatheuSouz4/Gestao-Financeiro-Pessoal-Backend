@@ -2,29 +2,37 @@ package com.example.loginauthapi.dto;
 
 import com.example.loginauthapi.model.Cliente;
 import com.example.loginauthapi.model.Status;
+import com.example.loginauthapi.model.TipoPessoa;
 import java.time.LocalDateTime;
 
-// DTO para enviar dados de resposta (consulta)
 public record ClienteResponseDTO(
         Long id,
-        String nome,
-        String cpfCnpj, // NOVO
+        String nomeOuNomeFantasia,
+        TipoPessoa tipoPessoa,
+        String razaoSocial,
+        String cpfCnpj,
+        String inscricaoEstadual,
+        String rg,
         String email,
         String telefone,
-        String endereco, // NOVO
-        String descricao, // NOVO
+        String endereco,
+        String descricao,
         Status status,
         LocalDateTime dataCadastro
 ) {
     public ClienteResponseDTO(Cliente cliente){
         this(
                 cliente.getId(),
-                cliente.getNome(),
-                cliente.getCpfCnpj(), // NOVO
+                cliente.getNomeOuNomeFantasia(),
+                cliente.getTipoPessoa(),
+                cliente.getRazaoSocial(),
+                cliente.getCpfCnpj(),
+                cliente.getInscricaoEstadual(),
+                cliente.getRg(),
                 cliente.getEmail(),
                 cliente.getTelefone(),
-                cliente.getEndereco(), // NOVO
-                cliente.getDescricao(), // NOVO
+                cliente.getEndereco(),
+                cliente.getDescricao(),
                 cliente.getStatus(),
                 cliente.getDataCadastro()
         );

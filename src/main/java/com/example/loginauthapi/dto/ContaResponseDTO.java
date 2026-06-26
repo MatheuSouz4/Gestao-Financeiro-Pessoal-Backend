@@ -1,7 +1,6 @@
 package com.example.loginauthapi.dto;
 
 import com.example.loginauthapi.model.Conta;
-import com.example.loginauthapi.model.Recorrencia;
 import com.example.loginauthapi.model.Status;
 import com.example.loginauthapi.model.TipoConta;
 
@@ -10,7 +9,6 @@ public record ContaResponseDTO(
         Long id,
         String nome,
         TipoConta tipo,
-        Recorrencia recorrencia,
         String descricao,
         Long clienteId,
         Long fornecedorId,
@@ -21,7 +19,6 @@ public record ContaResponseDTO(
                 conta.getId(),
                 conta.getNome(),
                 conta.getTipo(),
-                conta.getRecorrencia(),
                 conta.getDescricao(),
                 conta.getClienteId(),
                 conta.getFornecedorId(),

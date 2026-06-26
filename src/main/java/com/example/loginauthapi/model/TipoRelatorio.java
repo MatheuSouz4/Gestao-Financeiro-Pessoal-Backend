@@ -1,0 +1,15 @@
+package com.example.loginauthapi.model;
+
+public enum TipoRelatorio {
+    EXTRATO_GERAL,
+    TODAS_RECEITAS,
+    RECEITAS_RECEBIDAS,
+    RECEITAS_PENDENTES,
+    RECEITAS_VENCIDAS,
+    TODAS_DESPESAS,
+    DESPESAS_PAGAS,
+    DESPESAS_PENDENTES,
+    DESPESAS_VENCIDAS,
+    LANCAMENTOS_VENCIDOS,
+    RESUMO_SALDOS
+}

@@ -1,4 +1,4 @@
-package com.example.loginauthapi.controllers;
+package com.example.loginauthapi.controller;
 
 import com.example.loginauthapi.dto.ClienteRequestDTO;
 import com.example.loginauthapi.dto.ClienteResponseDTO;
@@ -15,7 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/clientes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Importante para conexão com o Angular em dev
+@CrossOrigin(origins = "*")
 public class ClienteController {
 
     private final ClienteService service;

@@ -1,4 +1,3 @@
-
 package com.example.loginauthapi.repositories;
 
 import com.example.loginauthapi.model.Fornecedor;
